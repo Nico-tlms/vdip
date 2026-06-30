@@ -5,9 +5,11 @@ define('DB_USER',    'u898144332_crvdip'); // ← votre utilisateur
 define('DB_PASS',    '');                  // ← votre mot de passe
 define('DB_CHARSET', 'utf8mb4');
 
-// Email (Gmail → créer un "mot de passe d'application" dans votre compte Google)
-define('SMTP_USER',      'votre.email@gmail.com');
-define('SMTP_PASS',      'xxxx xxxx xxxx xxxx');
+// Email Hostinger
+define('SMTP_HOST',      'smtp.hostinger.com');
+define('SMTP_PORT',      587);
+define('SMTP_USER',      'cr@votredomaine.com');   // ← votre email Hostinger
+define('SMTP_PASS',      'votre_mot_de_passe');    // ← mot de passe de cet email
 define('SMTP_FROM_NAME', 'Portail CR VDIP');
 
 define('APP_NAME', 'VDIP');

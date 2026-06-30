@@ -4,22 +4,93 @@ require_once dirname(__DIR__) . '/config.php';
 function sendReportEmail(array $report, array $manager, array $tech): bool {
     $date    = date('d/m/Y', strtotime($report['sent_at']));
     $type    = $report['type'] === 'service' ? 'Service Technique' : 'Chantier';
-    $subject = "=?UTF-8?B?" . base64_encode("CR $type — {$tech['name']} — $date") . "?=";
+    $subject = "CR $type — {$tech['name']} — $date";
     $content = json_decode($report['content'], true);
     $html    = buildEmailHtml($content, $report['type'], $tech['name'], $date);
 
-    $headers  = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: =?UTF-8?B?" . base64_encode(SMTP_FROM_NAME) . "?= <" . SMTP_USER . ">\r\n";
-    $headers .= "Reply-To: {$tech['email']}\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion();
+    return smtpSend(
+        to:      $manager['email'],
+        toName:  $manager['name'],
+        subject: $subject,
+        body:    $html
+    );
+}
 
-    return @mail($manager['email'], $subject, $html, $headers);
+/**
+ * Envoi SMTP natif (sans dépendance) — compatible Hostinger port 587 STARTTLS
+ */
+function smtpSend(string $to, string $toName, string $subject, string $body): bool {
+    $host = SMTP_HOST;
+    $port = SMTP_PORT;
+    $user = SMTP_USER;
+    $pass = SMTP_PASS;
+    $from = SMTP_USER;
+    $name = SMTP_FROM_NAME;
+
+    $errno = 0; $errstr = '';
+    $sock = @fsockopen($host, $port, $errno, $errstr, 10);
+    if (!$sock) return false;
+
+    $read = function() use ($sock) { return fgets($sock, 512); };
+    $send = function(string $cmd) use ($sock) { fwrite($sock, $cmd . "\r\n"); };
+
+    $read(); // 220 greeting
+    $send("EHLO " . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+    while (($line = $read()) && substr($line, 3, 1) === '-');
+
+    // STARTTLS
+    $send("STARTTLS");
+    $read();
+    stream_socket_enable_crypto($sock, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+
+    $send("EHLO " . ($_SERVER['HTTP_HOST'] ?? 'localhost'));
+    while (($line = $read()) && substr($line, 3, 1) === '-');
+
+    // Auth
+    $send("AUTH LOGIN");
+    $read();
+    $send(base64_encode($user));
+    $read();
+    $send(base64_encode($pass));
+    $resp = $read();
+    if (substr(trim($resp), 0, 3) !== '235') { fclose($sock); return false; }
+
+    // Enveloppe
+    $send("MAIL FROM:<$from>");
+    $read();
+    $send("RCPT TO:<$to>");
+    $read();
+    $send("DATA");
+    $read();
+
+    // Headers + body
+    $date8 = date('r');
+    $subjectB64 = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+    $fromName   = '=?UTF-8?B?' . base64_encode($name)    . '?=';
+    $toName     = '=?UTF-8?B?' . base64_encode($toName)  . '?=';
+
+    $message  = "Date: $date8\r\n";
+    $message .= "From: $fromName <$from>\r\n";
+    $message .= "To: $toName <$to>\r\n";
+    $message .= "Subject: $subjectB64\r\n";
+    $message .= "MIME-Version: 1.0\r\n";
+    $message .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $message .= "Content-Transfer-Encoding: base64\r\n";
+    $message .= "\r\n";
+    $message .= chunk_split(base64_encode($body));
+    $message .= "\r\n.";
+
+    $send($message);
+    $resp = $read();
+
+    $send("QUIT");
+    fclose($sock);
+
+    return substr(trim($resp), 0, 3) === '250';
 }
 
 function buildEmailHtml(array $c, string $type, string $techName, string $date): string {
-    $rows  = '';
-    $color = $type === 'service' ? '#2563eb' : '#d97706';
+    $rows = '';
     foreach ($c as $key => $val) {
         if (trim((string)$val) === '') continue;
         $label = fieldLabel($key);
