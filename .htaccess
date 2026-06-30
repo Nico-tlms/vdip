@@ -1,0 +1,10 @@
+Options -Indexes
+
+# Protéger les fichiers sensibles
+<FilesMatch "\.(sql|env|json)$">
+  Order allow,deny
+  Deny from all
+</FilesMatch>
+
+# Erreur 404 personnalisée (optionnel)
+ErrorDocument 404 /login.php
