@@ -1,7 +1,5 @@
--- Exécuter ce fichier une seule fois pour créer la base de données
-
-CREATE DATABASE IF NOT EXISTS vdip CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE vdip;
+-- Exécuter ce fichier dans la base de données déjà créée via votre panneau d'hébergement
+-- NE PAS inclure CREATE DATABASE (interdit sur hébergement mutualisé)
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
