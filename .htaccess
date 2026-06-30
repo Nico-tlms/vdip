@@ -1,10 +1,14 @@
 Options -Indexes
-
-# Page d'accueil par défaut
 DirectoryIndex index.php login.php
 
 # Protéger les fichiers sensibles
-<FilesMatch "\.(sql|env|json)$">
+<FilesMatch "\.(sql|env)$">
   Order allow,deny
   Deny from all
 </FilesMatch>
+
+# Bloquer l'accès direct aux includes
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^includes/ - [F,L]
+</IfModule>

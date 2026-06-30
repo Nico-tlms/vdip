@@ -1,19 +1,13 @@
 <?php
-// Configuration base de données
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'vdip');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_HOST',    'localhost');
+define('DB_NAME',    'u898144332_crvdip'); // ← votre nom de base
+define('DB_USER',    'u898144332_crvdip'); // ← votre utilisateur
+define('DB_PASS',    '');                  // ← votre mot de passe
 define('DB_CHARSET', 'utf8mb4');
 
-// Configuration email
-define('SMTP_HOST', 'smtp.gmail.com');
-define('SMTP_PORT', 587);
-define('SMTP_USER', 'votre.email@gmail.com');
-define('SMTP_PASS', 'votre_mot_de_passe_application');
+// Email (Gmail → créer un "mot de passe d'application" dans votre compte Google)
+define('SMTP_USER',      'votre.email@gmail.com');
+define('SMTP_PASS',      'xxxx xxxx xxxx xxxx');
 define('SMTP_FROM_NAME', 'Portail CR VDIP');
 
-define('APP_NAME', 'VDIP — Comptes Rendus');
-define('APP_URL', 'http://localhost');
-
-session_start();
+define('APP_NAME', 'VDIP');
