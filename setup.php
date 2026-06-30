@@ -50,6 +50,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $messages[] = '✅ Table <b>reports</b> créée.';
 
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS report_reads (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                report_id INT NOT NULL,
+                user_id INT NOT NULL,
+                read_at DATETIME DEFAULT NOW(),
+                UNIQUE KEY unique_read (report_id, user_id),
+                FOREIGN KEY (report_id) REFERENCES reports(id) ON DELETE CASCADE,
+                FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+        ");
+        $messages[] = '✅ Table <b>report_reads</b> créée.';
+
         // Compte admin
         $adminEmail = trim($_POST['admin_email'] ?? 'admin@vdip.fr');
         $adminPass  = $_POST['admin_pass'] ?? '';

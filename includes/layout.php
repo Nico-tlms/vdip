@@ -32,6 +32,16 @@ function layoutNav(): void {
         ? "<a href=\"$base/admin.php\" class=\"nav-link\"><svg width='16' height='16' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 3.6-7 8-7s8 3 8 7'/></svg>Admin</a>"
         : '';
 
+    $inboxLink = '';
+    if (isManager()) {
+        $unread    = unreadCount();
+        $badge     = $unread > 0 ? "<span class='nav-badge'>$unread</span>" : '';
+        $inboxLink = "<a href=\"$base/inbox.php\" class=\"nav-link {$_SESSION['_nav_class']['inbox']}\">
+            <svg width='16' height='16' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><path d='M22 12h-6l-2 3h-4l-2-3H2'/><path d='M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z'/></svg>
+            Boîte de réception $badge
+        </a>";
+    }
+
     $currentPage = basename($_SERVER['PHP_SELF']);
 
     echo <<<HTML
@@ -49,6 +59,7 @@ function layoutNav(): void {
       <svg width='16' height='16' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10'/><path d='M12 6v6l4 2'/></svg>
       Historique
     </a>
+    $inboxLink
     $adminLink
   </div>
   <div class="navbar-user">
@@ -69,6 +80,7 @@ function layoutStart(string $title = '', string $page = ''): void {
     $_SESSION['_nav_class'] = [
         'index' => $page === 'index' ? 'active' : '',
         'hist'  => $page === 'hist'  ? 'active' : '',
+        'inbox' => $page === 'inbox' ? 'active' : '',
     ];
     layoutHead($title);
     layoutNav();

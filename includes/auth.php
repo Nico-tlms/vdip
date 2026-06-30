@@ -55,3 +55,40 @@ function logout(): void {
 function isAdmin(): bool {
     return (currentUser()['role'] ?? '') === 'admin';
 }
+
+/** Retourne l'entrée managers liée à l'utilisateur connecté (par email), ou null */
+function currentManagerRecord(): ?array {
+    static $mgr = false;
+    if ($mgr === false) {
+        $user = currentUser();
+        if (empty($user)) { $mgr = null; return null; }
+        try {
+            $db   = getDB();
+            $stmt = $db->prepare('SELECT * FROM managers WHERE email = ? LIMIT 1');
+            $stmt->execute([$user['email']]);
+            $mgr  = $stmt->fetch() ?: null;
+        } catch (Exception $e) { $mgr = null; }
+    }
+    return $mgr;
+}
+
+function isManager(): bool {
+    return currentManagerRecord() !== null;
+}
+
+/** Nombre de CR non lus pour le responsable connecté */
+function unreadCount(): int {
+    $mgr  = currentManagerRecord();
+    $user = currentUser();
+    if (!$mgr || !$user) return 0;
+    try {
+        $db   = getDB();
+        $stmt = $db->prepare('
+            SELECT COUNT(*) FROM reports r
+            WHERE r.manager_id = ?
+              AND r.id NOT IN (SELECT report_id FROM report_reads WHERE user_id = ?)
+        ');
+        $stmt->execute([$mgr['id'], $user['id']]);
+        return (int)$stmt->fetchColumn();
+    } catch (Exception $e) { return 0; }
+}
