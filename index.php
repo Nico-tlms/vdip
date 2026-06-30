@@ -233,5 +233,4 @@ layoutStart('Nouveau compte rendu');
   </form>
 </div>
 
-<script src="/assets/js/app.js"></script>
 <?php layoutEnd(); ?>

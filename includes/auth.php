@@ -1,13 +1,22 @@
 <?php
 require_once __DIR__ . '/db.php';
 
+function baseUrl(): string {
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    // Détecte si le site est dans un sous-dossier
+    $script = $_SERVER['SCRIPT_NAME'] ?? '';
+    $dir    = rtrim(dirname($script), '/');
+    return $scheme . '://' . $host . $dir;
+}
+
 function isLoggedIn(): bool {
     return !empty($_SESSION['user']);
 }
 
 function requireLogin(): void {
     if (!isLoggedIn()) {
-        header('Location: /login.php');
+        header('Location: ' . baseUrl() . '/login.php');
         exit;
     }
 }
@@ -32,7 +41,7 @@ function login(string $email, string $password): bool {
 
 function logout(): void {
     session_destroy();
-    header('Location: /login.php');
+    header('Location: ' . baseUrl() . '/login.php');
     exit;
 }
 
