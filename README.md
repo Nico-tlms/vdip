@@ -167,5 +167,27 @@ tutoriels.vdip.fr {
     request_body {
         max_size 30MB
     }
+
+
+
+    ---
+
+
+    Il vous faut
+Ubuntu 22.04 / 24.04, accès sudo, ~2 Go de RAM libres.
+Node 22, git, build-essential, python3, sqlite3 :
+Le code (dépôt Git ou dossier copié) + deux valeurs : ADMIN_PASSWORD, SESSION_SECRET.
+Les étapes
+git clone … vdip-tutos && cd vdip-tutos && npm ci
+Créer .env.local :
+npm run build
+Service systemd (démarrage auto + relance si plantage) — modèle dans le guide.
+sudo ufw allow 3000/tcp, puis accès depuis n'importe quel poste : http://IP-DU-PC:3000 (hostname -I pour l'IP).
+Désactiver la mise en veille du PC.
+Point important : COOKIE_INSECURE=1
+Je viens d'ajouter cette option. Sans elle, sur un accès HTTP en réseau local (pas de HTTPS), le cookie de connexion serait bloqué et la connexion à /admin échouerait. Avec COOKIE_INSECURE=1, ça marche sur le LAN.
+→ À retirer seulement si un jour vous passez en HTTPS avec un nom de domaine (partie « Option B » du guide).
+
+Le trafic sur le réseau local n'est pas chiffré : c'est acceptable en interne, mais n'ouvrez pas ce port sur Internet sans HTTPS.
 }
 sudo systemctl reload caddy — Caddy obtient le certificat tout seul. Site en ligne : https://tutoriels.vdip.fr.
